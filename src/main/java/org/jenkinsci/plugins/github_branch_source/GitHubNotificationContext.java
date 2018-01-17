@@ -145,15 +145,7 @@ public final class GitHubNotificationContext {
      * @since TODO
      */
     public String getDefaultContext(TaskListener listener) {
-        if (head instanceof PullRequestSCMHead) {
-            if (((PullRequestSCMHead) head).isMerge()) {
-                return "continuous-integration/jenkins/pr-merge";
-            } else {
-                return "continuous-integration/jenkins/pr-head";
-            }
-        } else {
-            return "continuous-integration/jenkins/branch";
-        }
+        return "jenkins-build";
     }
 
     /**
