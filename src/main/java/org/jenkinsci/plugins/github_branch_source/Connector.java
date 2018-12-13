@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,6 +109,8 @@ public class Connector {
     private static final double MILLIS_PER_HOUR = TimeUnit.HOURS.toMillis(1);
     private static final Random ENTROPY = new Random();
     private static final String SALT = Long.toHexString(ENTROPY.nextLong());
+    private static final Map<String, String> lastUserCredentials = new ConcurrentHashMap<>();
+    private static final String[] credentials = new String[]{"jenkins-token-ghflow-dev", "jenkins-token"};
 
     private Connector() {
         throw new IllegalAccessError("Utility class");
@@ -745,5 +748,21 @@ public class Connector {
             connection.setRequestProperty(HEADER_NAME, FORCE_VALIDATION);
             return connection;
         }
+    }
+
+    static String randomize(String credentialsId) {
+        String pooledCredentialsId = credentialsId;
+
+        if ("jenkins-token-ghflow-dev".equals(credentialsId)) {
+            if (lastUserCredentials.containsValue("jenkins-token")) {
+                pooledCredentialsId = credentials[0];
+                lastUserCredentials.put("token", pooledCredentialsId);
+            } else {
+                pooledCredentialsId = credentials[1];
+                lastUserCredentials.put("token", pooledCredentialsId);
+            }
+        }
+
+        return pooledCredentialsId;
     }
 }
